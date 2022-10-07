@@ -9,7 +9,7 @@ public class Password {
         System.out.println("Please your password here: ");
         Scanner sc = new Scanner(System.in);
         String password = sc.nextLine();
-        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password)));
+        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password))+ "\nBycrpt: "+bcrypt(password));
 
     }
 
@@ -70,8 +70,19 @@ public class Password {
             return hexString.toString();
         }
 
-    }
+        public static String bcrypt (String password) throws NoSuchAlgorithmException {
+            String result = "";
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[16];
+            random.nextBytes(salt);
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(salt);
 
+            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+            result = toHexString(hashedPassword);
+            return result;
+        };
 
     /*
     *bcrypt ist eine Hashfunktion, die für das Hashen und Speichern von Passwörtern erfunden wurde.
@@ -87,3 +98,4 @@ public class Password {
     *
     *
     * */
+}
