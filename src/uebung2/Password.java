@@ -1,33 +1,53 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.security.*;
 
 public class Password {
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        System.out.println("Please your password here: ");
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException {
+        /*System.out.println("Please your password here: ");
         Scanner sc = new Scanner(System.in);
         String password = sc.nextLine();
-        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password))+ "\nBycrpt: "+bcrypt(password));
+        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password))+ "\nBycrpt: "+bcrypt(password));*/
+
+        System.out.println("------------------------------------------------------------------------------------------------------------------");
+
+        System.out.println("Plaintext: "+plaintext());
+
+        List<String> plaintexts = new ArrayList<String>();
+
+        System.out.println("MD5: "+Tabmd5(plaintexts));
+        System.out.println("SHA-257: "+Tabsha257(plaintexts));
+        System.out.println("Bycrpt: "+Tabbcrypt(plaintexts));
+
+
+
+
+
 
     }
+
 
     public static String md5(String input)
     {
         try {
 
-            // Static getInstance method is called with hashing MD5
+            // MD5 per getInstance aufrufen
             MessageDigest md = MessageDigest.getInstance("MD5");
 
-            // digest() method is called to calculate message digest
-            // of an input digest() return array of byte
+            // mit digest() die Message digest kalkulieren
+            // Retourgabe eines Arrays von Bytes
             byte[] messageDigest = md.digest(input.getBytes());
 
-            // Convert byte array into signum representation
+            // das byte array umwandeln
             BigInteger no = new BigInteger(1, messageDigest);
 
-            // Convert message digest into hex value
+            // in einen Hexwert umwandeln
             String hashtext = no.toString(16);
             while (hashtext.length() < 32) {
                 hashtext = "0" + hashtext;
@@ -35,7 +55,7 @@ public class Password {
             return hashtext;
         }
 
-        // For specifying wrong message digest algorithms
+        // Error Message
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -44,21 +64,20 @@ public class Password {
 
 
     public static byte[] sha256 (String password) throws NoSuchAlgorithmException {
-            // Static getInstance method is called with hashing SHA
+            // SHA-256 per getInstance aufrufen
             MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-            // digest() method called
-            // to calculate message digest of an input
-            // and return array of byte
+        // mit digest() die Message digest kalkulieren
+        // Retourgabe eines Arrays von Bytes
             return md.digest(password.getBytes(StandardCharsets.UTF_8));
         }
 
         public static String toHexString(byte[] hash)
         {
-            // Convert byte array into signum representation
+            // das byte array umwandeln
             BigInteger number = new BigInteger(1, hash);
 
-            // Convert message digest into hex value
+            // in einen Hexwert umwandeln
             StringBuilder hexString = new StringBuilder(number.toString(16));
 
             // Pad with leading zeros
@@ -73,8 +92,10 @@ public class Password {
         public static String bcrypt (String password) throws NoSuchAlgorithmException {
             String result = "";
             SecureRandom random = new SecureRandom();
+            // byte array für salt generieren
             byte[] salt = new byte[16];
             random.nextBytes(salt);
+            // SHA-256 per getInstance aufrufen
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             md.update(salt);
 
@@ -98,4 +119,51 @@ public class Password {
     *
     *
     * */
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static String plaintext() throws FileNotFoundException {
+        List<String> input = new ArrayList<String>();
+        Scanner s = new Scanner(new File("src/uebung2/ListPw"));
+
+        while (s.hasNext()){
+            input.add(s.next());
+        };
+
+        return input.toString();
+
+    };
+
+    public static String Tabmd5(List<String> plaintext) throws FileNotFoundException {
+        List<String> input = new ArrayList<String>();
+        Scanner s = new Scanner(new File("src/uebung2/ListPw"));
+        while(s.hasNext()){
+            input.add(md5(s.next()));
+        }
+        return input.toString();
+
+    };
+
+
+    public static String Tabsha257(List<String> plaintext) throws FileNotFoundException {
+        List<String> input = new ArrayList<String>();
+        Scanner s = new Scanner(new File("src/uebung2/ListPw"));
+        while(s.hasNext()){
+            input.add(md5(s.next()));
+        }
+        return input.toString();
+
+    };
+
+
+    public static String Tabbcrypt(List<String> plaintext) throws FileNotFoundException {
+        List<String> input = new ArrayList<String>();
+        Scanner s = new Scanner(new File("src/uebung2/ListPw"));
+        while(s.hasNext()){
+            input.add(md5(s.next()));
+        }
+        return input.toString();
+
+    };
+
 }
