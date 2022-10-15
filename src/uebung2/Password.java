@@ -1,5 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -9,28 +8,53 @@ import java.util.Scanner;
 import java.security.*;
 
 public class Password {
+
+    private static Boolean continueWriting = false;
+    private static Boolean match = false;
+    private static String matchAlgo = "";
+    private static String matchPW = "";
+
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException {
-        /*System.out.println("Please your password here: ");
+
+        System.out.println("Unterpunkt 1");
+        System.out.println("Please enter your password here: ");
         Scanner sc = new Scanner(System.in);
         String password = sc.nextLine();
-        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password))+ "\nBycrpt: "+bcrypt(password));*/
+        System.out.println("MD5: "+ md5(password)+ "\nSHA256: " + toHexString(sha256(password))+ "\nBycrpt: "+bcrypt(password));
 
         System.out.println("------------------------------------------------------------------------------------------------------------------");
 
-        System.out.println("Plaintext: "+plaintext());
+        System.out.println("Unterpunkt 2");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Please enter your password here:");
+        String hashPW = "";
+        try {
+            hashPW = br.readLine();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        if (hashPW.length() < 6) {
+            System.out.println("PW too short!");
+            return;
+        }
+        // hier definiert man die Algorithmen, auf die abgeprüft werden soll
+        final String hashTypes[] = { "MD5", "SHA-224", "SHA-256", "SHA-512" };
 
-        List<String> plaintexts = new ArrayList<String>();
+        // alle definierten Hash-Algorithmen durchprobieren
+        for (String hashType : hashTypes) {
+            resultPW(hashPW, hashType);
+        }
 
-        System.out.println("MD5: "+Tabmd5(plaintexts));
-        System.out.println("SHA-257: "+Tabsha257(plaintexts));
-        System.out.println("Bycrpt: "+Tabbcrypt(plaintexts));
-
-
-
-
-
-
+        // Wenn gefunden - Ausgabe der Infos über den Algorithmus sowie das Passwort im
+        // Plaintext
+        if (match) {
+            System.out.println("Match! Algorithm: " + matchAlgo);
+            System.out.println("Plain PW: " + matchPW);
+        } else
+            System.out.println("No matching PW found");
     }
+
+
 
 
     public static String md5(String input)
@@ -60,7 +84,6 @@ public class Password {
             throw new RuntimeException(e);
         }
     }
-
 
 
     public static byte[] sha256 (String password) throws NoSuchAlgorithmException {
@@ -122,7 +145,77 @@ public class Password {
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static String plaintext() throws FileNotFoundException {
+    public static void resultPW(String hashPW, String hashType){
+        MessageDigest md;
+        try {
+            //Passwort einlesen
+            BufferedReader br = new BufferedReader(new FileReader("src/uebung2/ListPw"));
+            FileWriter fw = new FileWriter(new File("src/uebung2/rainbowTables"+hashType+".txt"));
+            String line ="";
+
+            while ((line = br.readLine()) != null) {
+                md = MessageDigest.getInstance(hashType);
+                md.reset();
+                md.update(line.getBytes(StandardCharsets.UTF_8));
+                byte[] result = md.digest();
+
+                StringBuilder sb = new StringBuilder();
+                for (byte b : result) {
+                    sb.append(String.format("%02x", b));
+                }
+
+                String resultString = sb.toString();
+                //in File speichern
+                fw.write(resultString);
+                fw.write(System.lineSeparator());
+                fw.flush();
+
+                //Check, ob bereits Hash vorhanden ist --> Plaintext finden
+                if (resultString.equals(hashPW)) {
+                    match = true;
+                    matchPW = line;
+                    matchAlgo = hashType;
+                    if(!continueWriting){
+                        br.close();
+                        fw.close();
+                        return;
+                }
+                continue;
+            }
+        }
+        br.close();
+        fw.close();
+
+
+    } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* public static String plaintext() throws FileNotFoundException {
         List<String> input = new ArrayList<String>();
         Scanner s = new Scanner(new File("src/uebung2/ListPw"));
 
@@ -164,6 +257,6 @@ public class Password {
         }
         return input.toString();
 
-    };
+    };*/
 
 }
